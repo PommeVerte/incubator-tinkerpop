@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.P.neq;
+import static org.apache.tinkerpop.gremlin.process.traversal.P.*;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -159,14 +159,27 @@ public class TinkerGraphTest {
     @Ignore
     public void testPlay5() throws Exception {
         GraphTraversalSource g = TinkerFactory.createModern().traversal(GraphTraversalSource.standard());
-        g.V().as("a").xmatch(
+
+        /* g.V().values("name").and(not(eq("marko")),eq("josh")).forEachRemaining(System.out::println);
+        System.out.println("-------");
+        g.V().and(not(in("created")),out("created")).values("name").forEachRemaining(System.out::println);
+        */
+
+        //System.out.println(g.V().as("a").out("created").as("b").where(not(as("b").in())).<String>select().by("name").iterate().toString());
+        //g.V().as("a").out("created").as("b").where(not(as("a").in())).<String>select().by("name").forEachRemaining(System.out::println);
+
+
+        System.out.println(g.V().as("a").out("created").as("b").where(and(as("b").in(), not(as("a").out("created").has("name", "ripple")))).<String>select().by("name").iterate().toString());
+        g.V().as("a").out("created").as("b").where(and(as("b").in(),not(as("a").out("created").has("name","ripple")))).<String>select().by("name").forEachRemaining(System.out::println);
+
+        /*g.V().as("a").xmatch(
                 as("a").out("knows").as("b"),
                 as("a").out("created").as("c"),
                 as("b").out("created").as("c"),
                 as("c").in("created").as("d"),
                 as("d").where(neq("a")).where(neq("b")),
                 as("b").out("created").has("name", "ripple"))
-                .select(Pop.head, "a", "b", "c", "d").forEachRemaining(System.out::println);
+                .select(Pop.head, "a", "b", "c", "d").forEachRemaining(System.out::println); */
     }
 
     @Test

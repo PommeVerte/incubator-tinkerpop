@@ -20,12 +20,9 @@ package org.apache.tinkerpop.gremlin.process.traversal.step.map;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.Traverser;
-import org.apache.tinkerpop.gremlin.process.traversal.traverser.TraverserRequirement;
 import org.apache.tinkerpop.gremlin.structure.util.StringFactory;
 
-import java.util.Collections;
 import java.util.Objects;
-import java.util.Set;
 
 public class ConstantStep<S, E> extends MapStep<S, E> {
 

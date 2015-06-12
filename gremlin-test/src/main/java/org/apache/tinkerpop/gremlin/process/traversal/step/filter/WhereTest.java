@@ -22,6 +22,7 @@ import org.apache.tinkerpop.gremlin.LoadGraphWith;
 import org.apache.tinkerpop.gremlin.process.AbstractGremlinProcessTest;
 import org.apache.tinkerpop.gremlin.process.GremlinProcessRunner;
 import org.apache.tinkerpop.gremlin.process.IgnoreEngine;
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.TraversalEngine;
@@ -404,7 +405,7 @@ public abstract class WhereTest extends AbstractGremlinProcessTest {
 
         @Override
         public Traversal<Vertex,Map<String,String>> get_g_V_asXaX_outXcreatedX_asXbX_in_asXcX_whereXa__eqXcX_andXasXaX_outXknowsXXX_select_byXnameX() {
-            return g.V().as("a").out("created").as("b").in().as("c").where("a",eq("c").and(__.as("a").out("knows"))).<String>select().by("name");
+            return g.V().as("a").out("created").as("b").in().as("c").where("a", eq("c").and(__.as("a").out("knows"))).<String>select().by("name");
         }
 
         @Override

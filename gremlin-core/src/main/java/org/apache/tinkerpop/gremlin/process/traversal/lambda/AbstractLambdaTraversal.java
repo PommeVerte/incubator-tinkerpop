@@ -42,9 +42,9 @@ import java.util.Optional;
  */
 public abstract class AbstractLambdaTraversal<S, E> implements Traversal.Admin<S, E> {
 
-    private TraversalStrategies traversalStrategies = EmptyTraversalStrategies.instance();
-    private TraversalParent traversalParent = (TraversalParent) EmptyStep.instance();
-    private transient Graph graph = null;
+    protected TraversalStrategies traversalStrategies = EmptyTraversalStrategies.instance();
+    protected TraversalParent traversalParent = (TraversalParent) EmptyStep.instance();
+    protected transient Graph graph = null;
 
     public List<Step> getSteps() {
         return Collections.emptyList();

@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  */
 public final class AndP<V> extends ConjunctionP<V> {
 
-    public AndP(final Object... predicatesOrTraversals) {
+    public AndP(final Traversal<V,?>... predicatesOrTraversals) {
         super(predicatesOrTraversals);
         this.biPredicate = new AndBiPredicate(this);
     }
@@ -41,7 +41,7 @@ public final class AndP<V> extends ConjunctionP<V> {
     @Override
     public P<V> and(final Predicate<? super V> predicate) {
         if (!(predicate instanceof P))
-            throw new IllegalArgumentException("Only P predicates can be and'd together");
+            throw AND_OR_EXCEPTION.get();
         this.predicates.add((P<V>) predicate);   // TODO: clone and add?
         return this;
     }

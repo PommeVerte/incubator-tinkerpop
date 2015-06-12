@@ -136,7 +136,7 @@ public class PTest {
             predicate.and(new CustomPredicate());
             thrown = false;
         } catch (IllegalArgumentException ex) {
-            assertEquals("Only P predicates can be and'd together", ex.getMessage());
+            assertEquals("Only P predicates and traversals can be part of a conjunction", ex.getMessage());
         } finally {
             assertTrue(thrown);
         }
@@ -146,7 +146,7 @@ public class PTest {
             predicate.or(new CustomPredicate());
             thrown = false;
         } catch (IllegalArgumentException ex) {
-            assertEquals("Only P predicates can be or'd together", ex.getMessage());
+            assertEquals("Only P predicates and traversals can be part of a conjunction", ex.getMessage());
         } finally {
             assertTrue(thrown);
         }

@@ -21,7 +21,9 @@
 
 package org.apache.tinkerpop.gremlin.process.traversal;
 
+import org.apache.tinkerpop.gremlin.process.traversal.lambda.AbstractLambdaTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.util.AndP;
+import org.apache.tinkerpop.gremlin.process.traversal.util.FastNoSuchElementException;
 import org.apache.tinkerpop.gremlin.process.traversal.util.OrP;
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalP;
 
@@ -31,15 +33,20 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * @author Marko A. Rodriguez (http://markorodriguez.com)
  */
-public class P<V> implements Predicate<V>, Serializable, Cloneable {
+public class P<V> extends AbstractLambdaTraversal<V, V> implements Predicate<V>, Serializable, Cloneable {
+
+    protected Supplier<IllegalArgumentException> AND_OR_EXCEPTION = () -> new IllegalArgumentException("Only P predicates and traversals can be part of a conjunction");
 
     protected BiPredicate<V, V> biPredicate;
     protected V value;
+    protected V nextValue;
 
     public P(final BiPredicate<V, V> biPredicate, final V value) {
         this.value = value;
@@ -69,6 +76,22 @@ public class P<V> implements Predicate<V>, Serializable, Cloneable {
     }
 
     @Override
+    public boolean hasNext() {
+        return this.biPredicate.test(this.nextValue, this.value);
+    }
+
+    @Override
+    public V next() {
+        if (this.hasNext()) return this.nextValue;  // TODO: this does a "double check" on biPredicate
+        else throw FastNoSuchElementException.instance();
+    }
+
+    @Override
+    public void addStart(final Traverser<V> start) {
+        this.nextValue = start.get();
+    }
+
+    @Override
     public boolean equals(final Object other) {
         return other instanceof P &&
                 ((P) other).getClass().equals(this.getClass()) &&
@@ -86,38 +109,38 @@ public class P<V> implements Predicate<V>, Serializable, Cloneable {
         return new P<>(this.biPredicate.negate(), this.value);
     }
 
-    public P<V> and(final Traversal<?, ?> traversal) {
-        return this.and((Predicate) P.traversal(traversal));
+    public P<V> and(final Object traversal) {
+        if (!(traversal instanceof Traversal))
+            throw AND_OR_EXCEPTION.get();
+        return this.and(P.traversal((Traversal) traversal));
     }
 
-    public P<V> or(final Traversal<?, ?> traversal) {
-        return this.or((Predicate) P.traversal(traversal));
+    public P<V> or(final Object traversal) {
+        if (!(traversal instanceof Traversal))
+            throw AND_OR_EXCEPTION.get();
+        return this.or(P.traversal((Traversal) traversal));
     }
 
     @Override
     public P<V> and(final Predicate<? super V> predicate) {
         if (!(predicate instanceof P))
-            throw new IllegalArgumentException("Only P predicates can be and'd together");
+            throw AND_OR_EXCEPTION.get();
         return new AndP<>(this, (P<V>) predicate);
     }
 
     @Override
     public P<V> or(final Predicate<? super V> predicate) {
         if (!(predicate instanceof P))
-            throw new IllegalArgumentException("Only P predicates can be or'd together");
+            throw AND_OR_EXCEPTION.get();
         return new OrP<>(this, (P<V>) predicate);
     }
 
-    public <S,E> List<Traversal.Admin<S,E>> getTraversals() {
+    public <S, E> List<Traversal.Admin<S, E>> getTraversals() {
         return Collections.emptyList();
     }
 
     public P<V> clone() {
-        try {
-            return (P<V>) super.clone();
-        } catch (final CloneNotSupportedException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
+        return (P<V>) super.clone();
     }
 
     //////////////// statics

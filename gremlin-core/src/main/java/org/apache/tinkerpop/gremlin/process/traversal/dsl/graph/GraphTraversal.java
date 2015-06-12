@@ -119,7 +119,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.HasContainer;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.NoOpBarrierStep;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.TraversalComparator;
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.Tree;
-import org.apache.tinkerpop.gremlin.process.traversal.util.AndP;
 import org.apache.tinkerpop.gremlin.process.traversal.util.OrP;
 import org.apache.tinkerpop.gremlin.structure.Direction;
 import org.apache.tinkerpop.gremlin.structure.Edge;
@@ -614,16 +613,12 @@ public interface GraphTraversal<S, E> extends Traversal<S, E> {
         return this.asAdmin().addStep(new LambdaFilterStep<>(this.asAdmin(), predicate));
     }
 
-    public default GraphTraversal<S, E> or(final Object... predicatesOrTraversals) {
-        return this.asAdmin().addStep(0 == predicatesOrTraversals.length ?
-                new OrStep<>(this.asAdmin()) :
-                new WhereStep<>(this.asAdmin(), Scope.global, new OrP(predicatesOrTraversals)));
+    public default GraphTraversal<S, E> or(final Traversal<?,?>... orTraversals) {
+        return this.asAdmin().addStep(new OrStep(this.asAdmin(), orTraversals));
     }
 
-    public default GraphTraversal<S, E> and(final Object... predicatesOrTraversals) {
-        return this.asAdmin().addStep(0 == predicatesOrTraversals.length ?
-                new AndStep<>(this.asAdmin()) :
-                new WhereStep<>(this.asAdmin(), Scope.global, new AndP(predicatesOrTraversals)));
+    public default GraphTraversal<S, E> and(final Traversal<?,?>... andTraversals) {
+        return this.asAdmin().addStep(new AndStep(this.asAdmin(), andTraversals));
     }
 
     public default GraphTraversal<S, E> inject(final E... injections) {
@@ -1016,7 +1011,7 @@ public interface GraphTraversal<S, E> extends Traversal<S, E> {
 
     ////
 
-    public default GraphTraversal<S, E> xmatch(final Traversal<?,?>... andTraversals) {
+    public default GraphTraversal<S, E> xmatch(final Traversal<?, ?>... andTraversals) {
         return this.asAdmin().addStep(new XMatchStep<>(this.asAdmin(), andTraversals));
     }
 

@@ -37,18 +37,16 @@ public abstract class ConjunctionP<V> extends P<V> {
 
     protected List<P<V>> predicates;
 
-    public ConjunctionP(final Object... predicatesOrTraversals) {
+    public ConjunctionP(final Traversal<V, ?>... predicatesOrTraversals) {
         super(null, null);
         if (predicatesOrTraversals.length < 2)
             throw new IllegalArgumentException("The provided " + this.getClass().getSimpleName() + " array must have at least two arguments: " + predicatesOrTraversals.length);
         this.predicates = new ArrayList<>();
-        for (final Object object : predicatesOrTraversals) {
+        for (final Traversal<V, ?> object : predicatesOrTraversals) {
             if (object instanceof P)
                 this.predicates.add((P<V>) object);
-            else if (object instanceof Traversal)
-                this.predicates.add(new TraversalP((Traversal.Admin) object, false));
             else
-                throw new IllegalArgumentException("The provided " + this.getClass().getSimpleName() + " array must contain either predicates or traversals: " + object);
+                this.predicates.add(new TraversalP((Traversal.Admin) object, false));
         }
     }
 
@@ -118,14 +116,14 @@ public abstract class ConjunctionP<V> extends P<V> {
     @Override
     public P<V> and(final Predicate<? super V> predicate) {
         if (!(predicate instanceof P))
-            throw new IllegalArgumentException("Only P predicates can be and'd together");
-        return new AndP<>(this,predicate);
+            throw AND_OR_EXCEPTION.get();
+        return new AndP<>(this, (P<V>) predicate);
     }
 
     @Override
     public P<V> or(final Predicate<? super V> predicate) {
         if (!(predicate instanceof P))
-            throw new IllegalArgumentException("Only P predicates can be or'd together");
-        return new OrP<>(this, predicate);
+            throw AND_OR_EXCEPTION.get();
+        return new OrP<>(this, (P<V>) predicate);
     }
 }
