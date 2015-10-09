@@ -568,29 +568,34 @@ public class GremlinDriverIntegrateTest extends AbstractGremlinServerIntegration
         assumeNeo4jIsPresent();
 
         final Cluster cluster = Cluster.build().create();
-        final Client client = cluster.connect(name.getMethodName());
+        final Client sessionClient = cluster.connect(name.getMethodName());
+        final Client client = cluster.connect();
 
-        client.submit("graph.tx().onReadWrite(Transaction.READ_WRITE_BEHAVIOR.MANUAL);null").all().get();
-        client.submit("graph.tx().open()").all().get();
+        sessionClient.submit("graph.tx().onReadWrite(Transaction.READ_WRITE_BEHAVIOR.MANUAL);null").all().get();
+        sessionClient.submit("graph.tx().open()").all().get();
 
-        final Vertex vertexBeforeTx = client.submit("v=graph.addVertex(\"name\",\"stephen\")").all().get().get(0).getVertex();
+        final Vertex vertexBeforeTx = sessionClient.submit("v=graph.addVertex(\"name\",\"stephen\")").all().get().get(0).getVertex();
         assertEquals("stephen", vertexBeforeTx.values("name").next());
 
-        final Vertex vertexFromV = client.submit("graph.vertices().next()").all().get().get(0).getVertex();
+        final Vertex vertexFromV = sessionClient.submit("graph.vertices().next()").all().get().get(0).getVertex();
         assertEquals("stephen", vertexFromV.values("name").next());
-
-        final Vertex vertexFromBinding = client.submit("v").all().get().get(0).getVertex();
+        
+        final Vertex vertexFromBinding = sessionClient.submit("v").all().get().get(0).getVertex();
         assertEquals("stephen", vertexFromBinding.values("name").next());
 
-        client.submit("v.property(\"color\",\"blue\")").all().get();
-        client.submit("graph.tx().commit()").all().get();
-        client.submit("graph.tx().open()").all().get();
+        sessionClient.submit("v.property(\"color\",\"blue\")").all().get();
+        sessionClient.submit("graph.tx().commit()").all().get();
+        
+        final Vertex vertexFromVNoSession = client.submit("graph.vertices().next()").all().get().get(0).getVertex();
+        assertEquals("stephen", vertexFromVNoSession.values("name").next());
+        
+        sessionClient.submit("graph.tx().open()").all().get();
 
-        final Vertex vertexAfterTx = client.submit("graph.vertices().next()").all().get().get(0).getVertex();
+        final Vertex vertexAfterTx = sessionClient.submit("graph.vertices().next()").all().get().get(0).getVertex();
         assertEquals("stephen", vertexAfterTx.values("name").next());
         assertEquals("blue", vertexAfterTx.values("color").next());
 
-        client.submit("graph.tx().rollback()").all().get();
+        sessionClient.submit("graph.tx().rollback()").all().get();
 
         cluster.close();
     }
