@@ -110,6 +110,31 @@ public class GraphSONMessageSerializerGremlinV1d0Test {
         assertEquals(1, deserializedInnerMap.size());
         assertEquals("b", deserializedInnerMap.get("a"));
     }
+    
+    @Test
+    public void serializeTree() throws Exception {
+        
+        final TinkerGraph graph = TinkerGraph.open();
+        TinkerFactory.generateClassic(graph);
+        final GraphTraversalSource traversal = graph.traversal();
+        assertEquals(3, 2);
+        
+//        map.put("x", 1);
+//        map.put("y", "some");
+//        map.put("z", innerMap);
+//
+//        final ResponseMessage response = convert(map);
+//        assertCommon(response);
+//
+//        final Map<String, Object> deserializedMap = (Map<String, Object>) response.getResult().getData();
+//        assertEquals(3, deserializedMap.size());
+//        assertEquals(1, deserializedMap.get("x"));
+//        assertEquals("some", deserializedMap.get("y"));
+//
+//        final Map<String, String> deserializedInnerMap = (Map<String, String>) deserializedMap.get("z");
+//        assertEquals(1, deserializedInnerMap.size());
+//        assertEquals("b", deserializedInnerMap.get("a"));
+    }
 
     @Test
     public void serializeEdge() throws Exception {

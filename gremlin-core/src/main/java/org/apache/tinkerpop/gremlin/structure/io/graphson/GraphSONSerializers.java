@@ -44,7 +44,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import org.apache.tinkerpop.gremlin.process.traversal.step.util.Tree;
+import org.apache.tinkerpop.gremlin.structure.T;
 
 /**
  * Class used to serialize graph-based objects such as vertices, edges, properties, and paths. These serializers
@@ -97,7 +101,10 @@ final class GraphSONSerializers {
 
         private static void ser(final Property property, final JsonGenerator jsonGenerator,
                                 final SerializerProvider serializerProvider, final TypeSerializer typeSerializer) throws IOException {
-            jsonGenerator.writeStartObject();
+            
+                System.out.println("serializeing 8");
+                System.out.println(property);
+                jsonGenerator.writeStartObject();
             if (typeSerializer != null) jsonGenerator.writeStringField(GraphSONTokens.CLASS, HashMap.class.getName());
             serializerProvider.defaultSerializeField(GraphSONTokens.KEY, property.key(), jsonGenerator);
             serializerProvider.defaultSerializeField(GraphSONTokens.VALUE, property.value(), jsonGenerator);
@@ -128,7 +135,8 @@ final class GraphSONSerializers {
 
         private void ser(final Edge edge, final JsonGenerator jsonGenerator,
                                 final SerializerProvider serializerProvider, final TypeSerializer typeSerializer) throws IOException {
-            jsonGenerator.writeStartObject();
+            
+                System.out.println("serializeing 7");jsonGenerator.writeStartObject();
             if (typeSerializer != null) jsonGenerator.writeStringField(GraphSONTokens.CLASS, HashMap.class.getName());
             GraphSONUtil.writeWithType(GraphSONTokens.ID, edge.id(), jsonGenerator, serializerProvider, typeSerializer);
 
@@ -185,7 +193,8 @@ final class GraphSONSerializers {
         private void ser(final Vertex vertex, final JsonGenerator jsonGenerator,
                                 final SerializerProvider serializerProvider, final TypeSerializer typeSerializer)
                 throws IOException {
-            jsonGenerator.writeStartObject();
+            
+                System.out.println("serializeing 6");jsonGenerator.writeStartObject();
             if (typeSerializer != null) jsonGenerator.writeStringField(GraphSONTokens.CLASS, HashMap.class.getName());
             GraphSONUtil.writeWithType(GraphSONTokens.ID, vertex.id(), jsonGenerator, serializerProvider, typeSerializer);
             jsonGenerator.writeStringField(GraphSONTokens.LABEL, vertex.label());
@@ -196,7 +205,9 @@ final class GraphSONSerializers {
 
         private void writeProperties(final Vertex vertex, final JsonGenerator jsonGenerator,
                                             final SerializerProvider serializerProvider, final TypeSerializer typeSerializer) throws IOException {
-            jsonGenerator.writeObjectFieldStart(GraphSONTokens.PROPERTIES);
+            
+                System.out.println("serializeing 5");
+                jsonGenerator.writeObjectFieldStart(GraphSONTokens.PROPERTIES);
             if (typeSerializer != null) jsonGenerator.writeStringField(GraphSONTokens.CLASS, HashMap.class.getName());
 
             final List<String> keys = normalize ?
@@ -245,7 +256,8 @@ final class GraphSONSerializers {
         }
         private static void ser(final Path path, final JsonGenerator jsonGenerator, final TypeSerializer typeSerializer)
                 throws IOException {
-            jsonGenerator.writeStartObject();
+           
+                System.out.println("serializeing 4"); jsonGenerator.writeStartObject();
             if (typeSerializer != null) jsonGenerator.writeStringField(GraphSONTokens.CLASS, HashMap.class.getName());
             jsonGenerator.writeObjectField(GraphSONTokens.LABELS, path.labels());
             jsonGenerator.writeObjectField(GraphSONTokens.OBJECTS, path.objects());
@@ -271,7 +283,8 @@ final class GraphSONSerializers {
 
         private void ser(final Object o, final JsonGenerator jsonGenerator,
                          final SerializerProvider serializerProvider) throws IOException {
-            if (Element.class.isAssignableFrom(o.getClass()))
+           
+                System.out.println("serializeing 3"); if (Element.class.isAssignableFrom(o.getClass()))
                 jsonGenerator.writeFieldName((((Element) o).id()).toString());
             else
                 super.serialize(o, jsonGenerator, serializerProvider);
@@ -297,7 +310,8 @@ final class GraphSONSerializers {
 
         private static void serializeInternal(final TraversalMetrics traversalMetrics, final JsonGenerator jsonGenerator) throws IOException {
             // creation of the map enables all the fields to be properly written with their type if required
-            final Map<String, Object> m = new HashMap<>();
+            
+                System.out.println("serializeing 2");final Map<String, Object> m = new HashMap<>();
             m.put(GraphSONTokens.DURATION, traversalMetrics.getDuration(TimeUnit.NANOSECONDS) / 1000000d);
             final List<Map<String, Object>> metrics = new ArrayList<>();
             traversalMetrics.getMetrics().forEach(it -> metrics.add(metricsToMap(it)));
@@ -372,5 +386,75 @@ final class GraphSONSerializers {
         }
         jsonGenerator.writeEndObject();
     }
+    final static class CustContainer
+    {
+        public Tree tree;
+            public CustContainer(Tree tree)
+            {
+                this.tree = tree;
+            }
+            
+            public Tree getTree()
+            {
+                return tree;
+            }
+    }
+    
+    
+    final static class TreeJacksonSerializer extends StdSerializer<Tree> {
 
+        public TreeJacksonSerializer() {
+            super(Tree.class);
+        }
+        @Override
+        public void serialize(final Tree tree, final JsonGenerator jsonGenerator, final SerializerProvider serializerProvider)
+                throws IOException, JsonGenerationException {
+            ser(tree, jsonGenerator, null);
+        }
+
+        @Override
+        public void serializeWithType(final Tree tree, final JsonGenerator jsonGenerator,
+                                      final SerializerProvider serializerProvider, final TypeSerializer typeSerializer)
+                throws IOException, JsonProcessingException {
+            ser(tree, jsonGenerator, typeSerializer);
+        }
+        
+        private static void ser(final Tree container, final JsonGenerator jsonGenerator, final TypeSerializer typeSerializer)
+                throws IOException {
+                System.out.println("serializing 1");
+                
+            jsonGenerator.writeStartObject();
+            Tree tree = container;//.get(0);
+            
+            Set<Map.Entry<Element, Tree<T>>> set = tree.entrySet();
+            for(Map.Entry<Element, Tree<T>> entry : set)
+            {
+                Element key = entry.getKey();
+                jsonGenerator.writeObjectFieldStart(key.id().toString());
+            
+                System.out.println("serializing");
+                if (typeSerializer != null) jsonGenerator.writeStringField(GraphSONTokens.CLASS, HashMap.class.getName());
+                Object value = entry.getValue();
+                
+                    jsonGenerator.writeObjectField(GraphSONTokens.KEY, entry.getKey());
+                if(value instanceof Tree)
+                {
+                    ArrayList array = new ArrayList();
+                    array.add(value);
+                    
+                    jsonGenerator.writeObjectField(GraphSONTokens.VALUE, array);
+                }
+                else
+                {
+                    
+                    jsonGenerator.writeObjectField(GraphSONTokens.VALUE, value);
+                }
+                
+                jsonGenerator.writeEndObject();
+            }
+            
+            jsonGenerator.writeEndObject();
+            
+        }
+    } 
 }

@@ -19,6 +19,7 @@
 package org.apache.tinkerpop.gremlin.structure.io.graphson;
 
 import org.apache.tinkerpop.gremlin.process.traversal.Path;
+import org.apache.tinkerpop.gremlin.process.traversal.step.util.Tree;
 import org.apache.tinkerpop.gremlin.process.traversal.util.TraversalMetrics;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Property;
@@ -53,12 +54,15 @@ abstract class GraphSONModule extends SimpleModule {
          */
         protected GraphSONModuleV1d0(final boolean normalize) {
             super("graphson-1.0");
+            
+            System.out.println("choosing serializer operation");
             addSerializer(Edge.class, new GraphSONSerializers.EdgeJacksonSerializer(normalize));
             addSerializer(Vertex.class, new GraphSONSerializers.VertexJacksonSerializer(normalize));
             addSerializer(VertexProperty.class, new GraphSONSerializers.VertexPropertyJacksonSerializer(normalize));
             addSerializer(Property.class, new GraphSONSerializers.PropertyJacksonSerializer());
             addSerializer(TraversalMetrics.class, new GraphSONSerializers.TraversalMetricsJacksonSerializer());
             addSerializer(Path.class, new GraphSONSerializers.PathJacksonSerializer());
+            addSerializer(Tree.class, new GraphSONSerializers.TreeJacksonSerializer());
             addSerializer(StarGraphGraphSONSerializer.DirectionalStarGraph.class, new StarGraphGraphSONSerializer(normalize));
         }
 

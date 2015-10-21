@@ -72,6 +72,9 @@ public class GraphSONMapper implements Mapper<ObjectMapper> {
 
     @Override
     public ObjectMapper createMapper() {
+        
+        System.out.println("createMapper");
+        System.out.println(GraphSONTokens.CLASS);
         final ObjectMapper om = new ObjectMapper();
         om.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
